@@ -1166,44 +1166,65 @@ document.addEventListener("keydown", function(e) {
   if (e.key === "Escape") fermerModalEnregistrements();
 });
 
-const API_BASE_URL = "https://cis2-ham-v2.verif-csham.workers.dev";
+/* Communication Cloudflare Worker -> Google Apps Script */
+const API_URL = "https://cis2-ham-v2.verif-csham.workers.dev";
 
-async function apiGet(path) {
-  const response = await fetch(API_BASE_URL + path, {
+async function apiGet(action) {
+  const response = await fetch(API_URL + "?action=" + encodeURIComponent(action), {
     method: "GET",
-    headers: { "Accept": "application/json" }
+    cache: "no-store"
   });
-  const data = await response.json();
-  if (!response.ok || data.error) throw new Error(data.error || "Erreur serveur");
+
+  const text = await response.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    throw new Error("Réponse invalide du serveur : " + text.slice(0, 200));
+  }
+
+  if (!response.ok || (data && data.error)) {
+    throw new Error((data && data.error) || ("Erreur HTTP " + response.status));
+  }
+
   return data;
 }
 
-async function apiPost(path, body) {
-  const response = await fetch(API_BASE_URL + path, {
+async function apiPost(action, payload) {
+  const response = await fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify(body || {})
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(Object.assign({ action: action }, payload || {}))
   });
-  const data = await response.json();
-  if (!response.ok || data.error) throw new Error(data.error || "Erreur serveur");
+
+  const text = await response.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    throw new Error("Réponse invalide du serveur : " + text.slice(0, 200));
+  }
+
+  if (!response.ok || (data && data.error)) {
+    throw new Error((data && data.error) || ("Erreur HTTP " + response.status));
+  }
+
   return data;
 }
 
-window.onload = function() {
+window.onload = async function() {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   if (isStandalone) {
     const btnInst = document.getElementById('btnInstallerApp');
     if (btnInst) btnInst.style.display = 'none';
   }
 
-  apiGet("/api/data")
-    .then(function(data) {
-      configuration = data;
-      initialiserFormulaire();
-    })
-    .catch(function(erreur) {
-      afficherErreur(erreur.message || erreur);
-    });
+  try {
+    configuration = await apiGet("data");
+    initialiserFormulaire();
+  } catch (erreur) {
+    afficherErreur(erreur.message || erreur);
+  }
 };
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -1246,105 +1267,39 @@ function partagerApplication() {
 function genererImageGrade(url, classeSupplementaire = "", hauteur = "") {
   if (!url) return "";
 
-  const originalUrl = String(url).trim();
-  let direct = originalUrl;
-
-  try {
-    const parsed = new URL(originalUrl);
-    const host = parsed.hostname.toLowerCase();
-
-    // ============================================================
-    // GOOGLE DRIVE
-    // ============================================================
-    // On récupère l'ID du fichier depuis les différents formats
-    // de liens Drive que tu peux mettre dans Google Sheets.
-    if (host === "drive.google.com" || host === "docs.google.com") {
-      let fileId = "";
-
-      // Format : /file/d/ID/view
-      const matchFile = originalUrl.match(/\/file\/d\/([^/?#]+)/);
-      if (matchFile) {
-        fileId = matchFile[1];
-      }
-
-      // Format : ?id=ID
-      if (!fileId) {
-        fileId = parsed.searchParams.get("id") || "";
-      }
-
-      if (fileId) {
-        /*
-         * IMPORTANT :
-         * On utilise l'URL "thumbnail" de Google Drive et non
-         * "uc?export=view".
-         *
-         * C'est beaucoup plus adapté à l'affichage <img>, notamment
-         * sur Safari/iPhone, et ça évite la page Google Drive /
-         * le téléchargement qui pouvait empêcher l'image de s'afficher.
-         */
-        direct =
-          "https://drive.google.com/thumbnail?id=" +
-          encodeURIComponent(fileId) +
-          "&sz=w1000";
-      }
-    }
-
-    // ============================================================
-    // POSTIMAGE / POSTIMG
-    // ============================================================
-    else if (
-      host === "postimg.cc" ||
-      host === "www.postimg.cc"
-    ) {
-      // Si le lien est déjà une image directe, on le conserve.
-      direct = originalUrl;
-    }
-
-  } catch (e) {
-    console.error("Erreur traitement image grade :", e);
-    direct = originalUrl;
-  }
-
+  const u = String(url).trim();
   const classe = ("grade-img " + classeSupplementaire).trim();
   const style = hauteur ? ` style="height:${hauteur};"` : "";
 
-  /*
-   * On garde le lien original dans data-grade-original pour ne rien
-   * perdre et pour faciliter les futurs changements.
-   *
-   * Le fallback tente ensuite l'ancien système Drive si le thumbnail
-   * n'est pas disponible.
-   */
-  let fallback = "";
-
-  if (direct !== originalUrl) {
-    const oldDriveMatch = originalUrl.match(/\/file\/d\/([^/?#]+)/);
-
-    if (oldDriveMatch) {
-      const fileId = oldDriveMatch[1];
-      fallback =
-        "https://drive.google.com/uc?export=view&id=" +
-        encodeURIComponent(fileId);
-    } else {
-      try {
-        const p = new URL(originalUrl);
-        const id = p.searchParams.get("id");
-        if (id) {
-          fallback =
-            "https://drive.google.com/uc?export=view&id=" +
-            encodeURIComponent(id);
-        }
-      } catch (e) {}
-    }
+  // Les grades Google Drive sont envoyés par Apps Script sous forme
+  // data:image/...;base64,... : aucun accès externe n'est nécessaire.
+  if (u.startsWith("data:image/")) {
+    return `<img src="${escapeHtml(u)}"
+                 class="${classe}"
+                 alt="Grade"${style}>`;
   }
 
+  // Compatibilité avec les anciens liens encore présents dans le Sheet.
+  let direct = u;
+  try {
+    const parsed = new URL(u);
+    if (parsed.hostname === "postimg.cc" || parsed.hostname === "www.postimg.cc") {
+      parsed.hostname = "i.postimg.cc";
+      direct = parsed.toString();
+    }
+  } catch (e) {}
+
+  const proxyDirect = "https://images.weserv.nl/?url=" + encodeURIComponent(direct);
+  const proxyOriginal = "https://images.weserv.nl/?url=" + encodeURIComponent(u);
+
   return `<img src="${escapeHtml(direct)}"
-               data-grade-original="${escapeHtml(originalUrl)}"
-               data-grade-fallback="${escapeHtml(fallback)}"
+               data-grade-original="${escapeHtml(u)}"
+               data-grade-direct="${escapeHtml(direct)}"
+               data-grade-proxy="${escapeHtml(proxyDirect)}"
+               data-grade-proxy-original="${escapeHtml(proxyOriginal)}"
                class="${classe}"
                alt="Grade"${style}
-               loading="lazy"
-               onerror="if(this.dataset.gradeFallback && this.src !== this.dataset.gradeFallback){this.src=this.dataset.gradeFallback;}else{this.style.display='none';}">`;
+               onerror="if(this.dataset.gradeFallback==='0'){this.dataset.gradeFallback='1';this.src=this.dataset.gradeProxy;}else if(this.dataset.gradeFallback==='1'){this.dataset.gradeFallback='2';this.src=this.dataset.gradeProxyOriginal;}else{this.style.display='none';}">`;
 }
 
 function genererHtmlCard(nom, typeDefault) {
@@ -2348,12 +2303,12 @@ function envoyerInventaireFinal() {
     signalements: signalementsEnAttente
   };
 
-  apiPost("/api/inventory", payload)
+  apiPost("inventory", payload)
     .then(function(response) {
       supprimerBrouillonActuel();
       btnSend.disabled = false;
       btnSend.textContent = "Envoyer l'inventaire";
-      
+
       document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
       document.getElementById("page-succes").classList.add("active");
       window.scrollTo(0, 0);
@@ -2434,9 +2389,9 @@ function validerPin() {
   const pinTeste = pinSaisi;
   const error = document.getElementById("pinError");
 
-  apiPost("/api/pin", { pin: pinTeste })
+  apiPost("pin", { pin: pinTeste })
     .then(function(valide) {
-      if (valide) {
+      if (valide === true || valide === "true" || (valide && valide.valide === true)) {
         fermerModalPin();
         chargerEspaceResponsable();
       } else {
@@ -2467,7 +2422,7 @@ function chargerEspaceResponsable() {
   container.innerHTML = "⏳ Chargement du suivi...";
   afficherPage('responsable');
 
-  apiGet("/api/suivi")
+  apiGet("suivi")
     .then(function(donnees) {
       afficherSuiviResponsable(donnees);
     })
@@ -2567,9 +2522,9 @@ function quitterEspaceResponsable() {
 
 function reinitialiserInventairesChrono() {
   if (confirm("Voulez-vous vraiment réinitialiser les inventaires de la semaine en cours ?")) {
-    apiPost("/api/reset", {})
+    apiPost("reset", {})
       .then(function(res) {
-        alert(res.message);
+        alert(res.message || "Inventaires réinitialisés.");
         chargerEspaceResponsable();
       })
       .catch(function(err) {
