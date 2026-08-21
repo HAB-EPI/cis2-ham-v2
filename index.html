@@ -1,0 +1,2583 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventaire Parc, Lots et Pièces</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding-top: 70px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f4f5f7;
+  color: #171717;
+}
+
+#global-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  z-index: 999;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.global-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.global-logo {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+}
+
+.global-site-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: #000000;
+}
+
+.btn-header-icon {
+  background: #f4f4f5;
+  border: 1px solid #d4d4d4;
+  color: #000000;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.btn-header-icon:hover {
+  background: #e4e4e7;
+}
+
+.container {
+  max-width: 850px;
+  margin: auto;
+  padding: 15px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.header { 
+  text-align: center; 
+}
+
+.header h1 { 
+  margin: 0; 
+  font-size: 24px;
+  color: #000000;
+  letter-spacing: -0.5px;
+}
+
+.header p { 
+  margin: 5px 0 0; 
+  color: #525252; 
+}
+
+.btn-resp-header {
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.2s ease;
+}
+
+.btn-resp-header:hover {
+  opacity: 0.85;
+}
+
+.btn-reset-inventaires {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s ease;
+}
+
+.btn-reset-inventaires:hover {
+  background: #b91c1c;
+}
+
+.page { display: none; }
+.page.active { display: block !important; }
+
+.section-title { 
+  font-size: 18px; 
+  font-weight: 700; 
+  margin-bottom: 15px; 
+  color: #000000;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.field-title { font-weight: 600; margin-bottom: 8px; color: #262626; }
+
+.team-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.team-option {
+  position: relative;
+  border: 2px solid #e5e7eb;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 15px 10px;
+  min-height: 64px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.team-option:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.team-option:active {
+  transform: scale(0.97);
+}
+
+.team-option.selected {
+  color: #ffffff;
+  animation: teamPulse 0.25s ease-out;
+}
+
+.team-option.team-a.selected {
+  background: #2563eb;
+  border-color: #2563eb;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.25);
+}
+
+.team-option.team-b.selected {
+  background: #dc2626;
+  border-color: #dc2626;
+  box-shadow: 0 6px 18px rgba(220,38,38,0.25);
+}
+
+.team-option.team-c.selected {
+  background: #16a34a;
+  border-color: #16a34a;
+  box-shadow: 0 6px 18px rgba(22,163,74,0.25);
+}
+
+@keyframes teamPulse {
+  0% { transform: scale(0.94); }
+  70% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 520px) {
+  .team-selector {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.engins-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.engin-card {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #d4d4d4;
+  padding: 12px;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 150px;
+}
+
+.engin-card:hover { 
+  transform: translateY(-2px);
+  border-color: #000000;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.engin-photo-container {
+  width: 100%;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f8f8;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 4px;
+}
+
+.engin-photo {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.engin-icon { font-size: 38px; }
+
+.partie-card {
+  background: #ffffff;
+  color: #171717;
+  border: 1px solid #d4d4d4;
+  padding: 15px 10px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 55px;
+  user-select: none;
+}
+
+.partie-card.selected {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+.btn-select-all {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #f4f4f5;
+  border: 1px dashed #737373;
+  color: #000000;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+select, textarea, input[type="file"], input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d4d4d4;
+  font-size: 15px;
+  background: #ffffff;
+  color: #000000;
+  margin-bottom: 12px;
+}
+
+select:focus, textarea:focus, input:focus {
+  outline: none;
+  border-color: #000000;
+}
+
+.agents {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.agent-card-tile {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  position: relative;
+  overflow: hidden;
+}
+
+.agent-card-tile:hover {
+  border-color: #a3a3a3;
+  transform: translateY(-1px);
+}
+
+.agent-card-tile:active {
+  transform: scale(0.97);
+}
+
+.agent-card-tile.selected {
+  background: #f0fdf4;
+  border-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+}
+
+.agent-card-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.grade-img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+.agent-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3730a3;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+.material {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 14px 0;
+}
+
+.group-card .material:last-child {
+  border-bottom: none;
+}
+.material:last-child { border-bottom: none; }
+.material-name { font-size: 15px; font-weight: 600; margin-bottom: 10px; color: #000000; }
+
+.group-card {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #cbd5e1;
+  border-left: 6px solid #334155;
+  border-radius: 13px;
+  padding: 14px;
+  margin: 18px 0;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.10);
+}
+
+.group-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e293b;
+  background: linear-gradient(90deg, #e2e8f0 0%, #f8fafc 100%);
+  border-radius: 9px;
+  padding: 10px 11px;
+  margin: -2px -2px 10px -2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid #94a3b8;
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.8);
+}
+
+.status { 
+  display: flex; 
+  gap: 6px; 
+  width: 100%;
+}
+
+.status button {
+  flex: 1;
+  padding: 10px 4px;
+  border-radius: 8px;
+  border: 1px solid #d4d4d4;
+  background: #ffffff;
+  color: #404040;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.status button:active {
+  transform: scale(0.96);
+}
+
+.status button[data-status="present"].selected {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  border-color: #16a34a !important;
+}
+
+.status button[data-status="manquant"].selected {
+  background: #ea580c !important;
+  color: #ffffff !important;
+  border-color: #ea580c !important;
+}
+
+.status button[data-status="absent"].selected {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+}
+
+.missing-box {
+  display: none;
+  margin-top: 10px;
+  padding: 12px;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: 10px;
+}
+.missing-box.visible { display: block; }
+.missing-title { font-weight: 600; margin-bottom: 6px; color: #9a3412; font-size: 13px; }
+
+.quantities { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+.quantity {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #d4d4d4;
+  background: #ffffff;
+  color: #000000;
+  cursor: pointer;
+  font-weight: bold;
+}
+.quantity.selected { 
+  background: #ea580c !important; 
+  color: #ffffff !important; 
+  border-color: #ea580c !important; 
+}
+
+.navigation { display: flex; gap: 10px; margin-top: 20px; }
+.navigation button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.previous { background: #e5e5e5; color: #171717; }
+.next { background: #000000; color: #ffffff; }
+.send { background: #000000 !important; color: #ffffff !important; }
+
+.report-container { margin-top: 15px; text-align: center; }
+
+.btn-report {
+  width: 100%;
+  padding: 12px;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-report:hover {
+  background: #f4f4f5;
+}
+
+
+.pin-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  min-height: 52px;
+  margin: 8px 0 14px;
+}
+
+.pin-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
+  transition: all 0.15s ease;
+}
+
+.pin-dot.filled {
+  background: #111827;
+  border-color: #111827;
+  transform: scale(1.12);
+}
+
+.pin-error {
+  display: none;
+  text-align: center;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.pin-key {
+  height: 58px;
+  border: 1px solid #d4d4d8;
+  border-radius: 13px;
+  background: #f8fafc;
+  color: #111827;
+  font-size: 21px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.pin-key:hover {
+  background: #eef2f7;
+}
+
+.pin-key:active {
+  transform: scale(0.94);
+}
+
+.pin-key.action {
+  font-size: 15px;
+  background: #f4f4f5;
+}
+
+.pin-key.zero {
+  grid-column: 2;
+}
+
+
+#modalSignalement .modal-card {
+  border-top: 5px solid #f59e0b;
+}
+
+#modalSignalement .modal-header {
+  font-size: 19px;
+  align-items: center;
+}
+
+#modalSignalement .field-title {
+  margin-top: 15px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #57534e;
+}
+
+#modalSignalement textarea {
+  min-height: 105px;
+  resize: vertical;
+  background: #fffcf5;
+  border-color: #f3d08a;
+}
+
+#modalSignalement .checkbox-list {
+  background: #fffdf7;
+  border-color: #f3d08a;
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.active { display: flex; }
+
+.modal-card {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  animation: modalSlide 0.25s ease-out;
+}
+
+@keyframes modalSlide {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  font-size: 17px;
+  font-weight: bold;
+  color: #000000;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #525252;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid #d4d4d4;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
+  background: #fafafa;
+}
+
+.checkbox-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+.checkbox-item input { width: 18px; height: 18px; accent-color: #000000; }
+
+.modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+.modal-actions button { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+.btn-cancel { background: #e5e5e5; color: #000000; }
+.btn-submit { background: #000000; color: #ffffff; }
+
+.controle-incomplet-toast {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  background: rgba(0, 0, 0, 0.58);
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.controle-incomplet-toast .controle-incomplet-modal {
+  width: min(520px, 100%);
+  max-height: min(78vh, 680px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.30);
+  padding: 22px;
+  color: #111827;
+}
+
+.controle-incomplet-toast .controle-incomplet-titre {
+  font-size: 21px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.controle-incomplet-toast .controle-incomplet-intro {
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: #4b5563;
+}
+
+.controle-incomplet-toast ol {
+  margin: 0 0 18px 24px;
+  padding: 0;
+}
+
+.controle-incomplet-toast li {
+  margin: 7px 0;
+  font-weight: 600;
+}
+
+.controle-incomplet-toast button {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 800;
+  background: #111827;
+  color: white;
+}
+
+
+.signalement-toast {
+  display: none;
+  background: #f0fdf4;
+  border: 1px solid #16a34a;
+  color: #15803d;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+.suivi-entete {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.suivi-photo {
+  width: 58px;
+  height: 42px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: #f8f8f8;
+  border: 1px solid #e5e7eb;
+  padding: 3px;
+}
+
+.dernier-signalement {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #fffaf0;
+  border: 1px solid #fbbf24;
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px;
+}
+
+.aucun-signalement {
+  margin-top: 10px;
+  padding: 9px 12px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-left: 4px solid #16a34a;
+  border-radius: 10px;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.item-suivi { border-left: 4px solid #171717; padding: 12px; margin-bottom: 12px; background: #fafafa; border-radius: 8px; }
+.statut-non { border-color: #dc2626; }
+.statut-cours { border-color: #ea580c; }
+.statut-fait { border-color: #16a34a; }
+
+.anomalie-tag { display: block; margin-top: 4px; font-weight: bold; font-size: 13px; }
+.anomalie-absent { color: #dc2626; }
+.anomalie-manquant { color: #ea580c; }
+
+
+.loading { text-align: center; padding: 50px; color: #000000; }
+
+/* Enregistrements de contrôles en cours */
+.enregistrements-card { margin-top: 18px; }
+.enregistrement-list { display: grid; gap: 10px; }
+.enregistrement-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  padding-right: 48px;
+  border: 1px solid #d4d4d4;
+  border-radius: 14px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.enregistrement-item:hover { transform: translateY(-1px); border-color: #171717; box-shadow: 0 5px 14px rgba(0,0,0,.07); }
+.enregistrement-photo {
+  width: 72px; height: 52px; object-fit: contain; flex: 0 0 auto;
+  background: #f5f5f5; border: 1px solid #e5e7eb; border-radius: 9px; padding: 3px;
+}
+.enregistrement-info { min-width: 0; flex: 1; }
+.enregistrement-titre { font-weight: 800; font-size: 15px; color: #111827; margin-bottom: 4px; }
+.enregistrement-meta { font-size: 12px; color: #525252; line-height: 1.45; }
+.enregistrement-agents { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.enregistrement-agent { display: inline-flex; align-items: center; gap: 4px; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 6px; padding: 3px 6px; font-size: 11px; font-weight: 700; color: #3730a3; }
+.enregistrement-agent img { height: 18px; width: auto; object-fit: contain; }
+.btn-supprimer-enregistrement {
+  position: absolute; right: 9px; top: 9px; width: 30px; height: 30px;
+  border: none; border-radius: 8px; background: #fee2e2; color: #b91c1c;
+  font-size: 18px; font-weight: 800; cursor: pointer; z-index: 2;
+}
+.btn-supprimer-enregistrement:hover { background: #fecaca; }
+.enregistrements-vide { padding: 12px; border-radius: 10px; background: #f8fafc; color: #64748b; font-size: 13px; text-align: center; }
+.btn-header-save, .btn-header-saved {
+  display: none; border: none; border-radius: 8px; padding: 7px 9px;
+  font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap;
+}
+.btn-header-save { background: #111827; color: #fff; }
+.btn-header-save.saved { background: #166534; }
+.btn-header-saved { display: inline-flex; background: #f3f4f6; color: #111827; border: 1px solid #d1d5db; }
+.enregistrements-modal {
+  position: fixed; inset: 0; z-index: 1200; display: none; align-items: center; justify-content: center;
+  padding: 18px; background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
+}
+.enregistrements-modal.active { display: flex; }
+.enregistrements-modal-card {
+  width: min(680px, 100%); max-height: min(82vh, 760px); overflow: auto;
+  background: #fff; border-radius: 16px; padding: 18px; box-shadow: 0 18px 50px rgba(0,0,0,.25);
+}
+.enregistrements-modal-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; }
+.enregistrements-modal-close { border:0; background:#f3f4f6; width:34px; height:34px; border-radius:9px; font-size:22px; cursor:pointer; }
+@media (max-width: 600px) {
+  .global-site-name { display:none; }
+  .btn-header-save, .btn-header-saved { padding: 7px 8px; font-size: 11px; }
+}
+.success { display: none; padding: 20px; margin-top: 20px; border-radius: 12px; background: #f0fdf4; border: 1px solid #16a34a; color: #15803d; }
+.error { display: none; padding: 20px; margin-top: 20px; border-radius: 12px; background: #fef2f2; border: 1px solid #dc2626; color: #b91c1c; }
+</style>
+
+</head>
+
+<body>
+
+<header id="global-header">
+  <div class="global-logo-container">
+    <img src="https://i.postimg.cc/RF3pJnK7/Untitled-design-3.png" alt="Logo" class="global-logo" onerror="this.style.display='none'">
+    <span class="global-site-name">CIS-2 HAM</span>
+  </div>
+  <div style="display: flex; gap: 6px; align-items: center;">
+    <button class="btn-header-icon" onclick="partagerApplication()" title="Partager l'application">
+      ↥
+    </button>
+    <button id="btnHeaderSaved" class="btn-header-saved" type="button" onclick="ouvrirModalEnregistrements()">📋 Enregistrés</button>
+    <button id="btnHeaderSave" class="btn-header-save" type="button" onclick="enregistrerBrouillon()">💾 Enregistrer</button>
+    <button class="btn-resp-header" onclick="ouvrirModalPin()">🔑 Sous-Off</button>
+  </div>
+</header>
+
+<div class="container">
+
+<div id="loading" class="card loading">⏳ Chargement...</div>
+
+<div id="application" style="display:none;">
+<div id="modalEnregistrements" class="enregistrements-modal" onclick="fermerModalEnregistrements(event)">
+  <div class="enregistrements-modal-card" onclick="event.stopPropagation()">
+    <div class="enregistrements-modal-head">
+      <div class="section-title" style="margin:0;">📋 Contrôles enregistrés</div>
+      <button type="button" class="enregistrements-modal-close" onclick="fermerModalEnregistrements()">×</button>
+    </div>
+    <div id="enregistrementsContainer" class="enregistrement-list"></div>
+  </div>
+</div>
+
+
+<div id="page-0" class="page active">
+  <div class="card header">
+    <h1>Inventaire Parc & Équipements</h1>
+    <p>Sélectionnez un véhicule, un lot ou un matériel opérationnel</p>
+  </div>
+
+  <div class="card">
+    <div class="section-title">🛠️ Matériel opérationnel</div>
+    <div id="materielOperationnelContainer" class="engins-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">🚒 Véhicules</div>
+    <div id="enginsContainer" class="engins-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">🧰 Lots</div>
+    <div id="lotsContainer" class="engins-grid"></div>
+  </div>
+
+  <div id="materielPersonnelCard" class="card" style="display:none;">
+    <div class="section-title">👤 Matériel personnel</div>
+    <div id="materielPersonnelContainer" class="engins-grid"></div>
+  </div>
+</div>
+
+<div id="page-1" class="page">
+  <div class="card header">
+    <h1 id="titreEnginChoisi">Sélection</h1>
+    <p>Choix des parties à contrôler, de l'équipe et des agents</p>
+  </div>
+
+  <div class="card" id="cardParties">
+    <div class="section-title">🧩 Partie(s) à contrôler</div>
+    <div class="field-title">Sélectionnez une ou plusieurs parties :</div>
+
+    <button type="button" class="btn-select-all" id="btnSelectAll" onclick="toutSelectionnerComplet()">
+      🔥 Tout sélectionner (Véhicule Complet)
+    </button>
+
+    <div id="partiesContainer" class="engins-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">👥 Équipe & Personnel</div>
+
+    <div class="field-title">Équipe concernée</div>
+    <div id="teamSelector" class="team-selector">
+      <button type="button" class="team-option team-a" data-team-label="Équipe A" onclick="selectionnerEquipe('Équipe A', this)">Équipe A</button>
+      <button type="button" class="team-option team-b" data-team-label="Équipe B" onclick="selectionnerEquipe('Équipe B', this)">Équipe B</button>
+      <button type="button" class="team-option team-c" data-team-label="Équipe C" onclick="selectionnerEquipe('Équipe C', this)">Équipe C</button>
+    </div>
+
+    <br><br>
+
+    <div class="field-title">👨‍🚒 Agent(s) sélectionné(s)</div>
+    <div id="agents" class="agents"></div>
+  </div>
+
+  <div class="navigation">
+    <button class="previous" onclick="retourChoixEngin()">← Retour</button>
+    <button class="next" onclick="demarrerInventaire()">Commencer le contrôle →</button>
+  </div>
+</div>
+
+<div id="coffres"></div>
+
+<div id="page-finale" class="page">
+  <div class="card">
+    <div class="section-title">✅ Vérification Récapitulative</div>
+    <p>Vérifiez le bilan complet ci-dessous avant d'envoyer le rapport.</p>
+    <div id="resume" style="margin-top: 15px; font-size: 15px; line-height: 1.5;"></div>
+    <div id="success" class="success"></div>
+    <div id="error" class="error"></div>
+  </div>
+
+  <div class="navigation">
+    <button class="previous" onclick="pagePrecedente()">← Précédent</button>
+    <button id="sendButton" class="send" onclick="envoyerInventaireFinal()">Envoyer l'inventaire</button>
+  </div>
+</div>
+
+<div id="page-succes" class="page">
+  <div class="card" style="text-align: center; padding: 40px 20px;">
+    <h2 style="color: #16a34a; font-size: 24px; margin-bottom: 10px;">🎉 Inventaire validé avec succès !</h2>
+    <p style="color: #525252; margin-bottom: 25px;">Les données ont bien été enregistrées et transmises.</p>
+    <button class="next" onclick="retourAccueilDepuisSucces()" style="max-width: 300px; margin: 0 auto;">🏠 Retour à l'accueil</button>
+  </div>
+</div>
+
+<div id="page-responsable" class="page">
+  <div class="card header">
+    <h1>📊 Espace Sous-Off de Garde</h1>
+    <p>Suivi complet des contrôles et des anomalies</p>
+  </div>
+
+  <div class="card">
+    <button class="btn-reset-inventaires" onclick="reinitialiserInventairesChrono()">
+      🔄 Réinitialiser les inventaires de la semaine
+    </button>
+
+    <div class="section-title">État des contrôles & Anomalies</div>
+    <div id="contenuSuiviResp">Chargement des données...</div>
+  </div>
+  <div class="navigation">
+    <button class="previous" onclick="quitterEspaceResponsable()">← Retour Accueil</button>
+  </div>
+</div>
+
+</div>
+</div>
+
+<div id="modalSignalement" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>⚠️ Signaler un problème</span>
+      <button style="border:none;background:none;font-size:20px;color:#000;cursor:pointer;" onclick="fermerModalSignalement()">&times;</button>
+    </div>
+
+    <div id="modalCoffreTitre" class="modal-subtitle">🧰 Coffre : -</div>
+
+    <div class="field-title">Sélectionnez le(s) matériel(s) concerné(s) :</div>
+    <div id="sigMaterielsContainer" class="checkbox-list"></div>
+
+    <div class="field-title">Observation / Description du problème :</div>
+    <textarea id="sigObservation" rows="3" placeholder="Description du problème..."></textarea>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fermerModalSignalement()">Annuler</button>
+      <button id="btnValiderSig" class="btn-submit" onclick="enregistrerSignalementLocalement()">Valider le signalement</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalPin" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>🔑 Accès Sous-Off de Garde</span>
+      <button style="border:none;background:none;font-size:20px;color:#000;cursor:pointer;" onclick="fermerModalPin()">&times;</button>
+    </div>
+
+    <div class="field-title" style="text-align:center;">Code PIN d'accès</div>
+
+    <div id="pinDisplay" class="pin-display" aria-label="Code PIN">
+      <span class="pin-dot"></span>
+      <span class="pin-dot"></span>
+      <span class="pin-dot"></span>
+      <span class="pin-dot"></span>
+    </div>
+
+    <div id="pinError" class="pin-error">Mot de passe incorrect</div>
+
+    <div class="pin-keypad">
+      <button type="button" class="pin-key" onclick="saisirChiffrePin('1')">1</button>
+      <button type="button" class="pin-key" onclick="saisirChiffrePin('2')">2</button>
+      <button type="button" class="pin-key" onclick="saisirChiffrePin('3')">3</button>
+      <button type="button" class="pin-key" onclick="saisirChiffrePin('4')">4</button>
+      <button type="button" class="pin-key" onclick="saisirChiffrePin('5')">5</button>
+      <button type="button" class="pin-key" onclick="saisirChiffrePin('6')">6</button>
+      <button type="button" class="pin-key" onclick="saisirChiffrePin('7')">7</button>
+      <button type="button" class="pin-key" onclick="saisirChiffrePin('8')">8</button>
+      <button type="button" class="pin-key" onclick="saisirChiffrePin('9')">9</button>
+      <button type="button" class="pin-key action" onclick="effacerDernierChiffrePin()">⌫</button>
+      <button type="button" class="pin-key zero" onclick="saisirChiffrePin('0')">0</button>
+      <button type="button" class="pin-key action" onclick="reinitialiserPin()">C</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fermerModalPin()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const IMAGES_PARC = {
+  "FPTSR 11": "https://i.postimg.cc/X7JXPTtw/FPTSR.png",
+  "CCRM 10": "https://i.postimg.cc/zfdcxHhc/CCRM.png",
+  "EA25 01": "https://i.postimg.cc/dt2v4nVZ/EA.png",
+  "VSAV 54": "https://i.postimg.cc/zfCHSTRR/VSAV54.png",
+  "VSAV 58": "https://i.postimg.cc/Ssw5FXG1/VSAV58.png",
+  "VID 13": "https://i.postimg.cc/YSd3tNn8/VID13.png",
+  "MPR120 08": "https://i.postimg.cc/fy6Lmb5d/MPR.png",
+  "LOT BACHAGE": "https://i.postimg.cc/Pqr5gXbQ/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-2.png",
+  "LOT BUCHERONNAGE": "https://i.postimg.cc/FzqP4HJ9/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-3.png",
+  "LOT ECLAIRAGE": "https://i.postimg.cc/YqTpXN0T/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-4.png",
+  "LOT EPUISEMENT": "https://i.postimg.cc/HxnRDKhs/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-5.png",
+  "LOT FRELONS ASIATIQUES": "https://i.postimg.cc/0yW2YgmT/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-6.png",
+  "LOT GUÊPES": "https://i.postimg.cc/nLdZDNjj/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-7.png",
+  "LOT RENFORT EPUISEMENT": "https://i.postimg.cc/8C7XZYX7/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-8.png",
+  "LOT VENTILATEUR HYDRAULIQUE": "https://i.postimg.cc/KYYVTjyb/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-10.png",
+  "LOT MPE 90M3": "https://i.postimg.cc/jjK8650r/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-11.png",
+  "STANDARD": "https://i.postimg.cc/nV6zz7v0/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-17.png",
+  "SAC PROMPT SECOURS": "https://i.postimg.cc/qR6BDsgz/httpsi-postimg-cc-NMFg-Sb-TQVSAVPL-png-15.png"
+};
+
+let configuration = null;
+let elementSelectionne = null;
+let partiesSelectionnees = new Set();
+let partiesUniquesListe = [];
+let coffresEngin = [];
+let pageActuelle = 0;
+let nombrePagesTotal = 0;
+let resultats = [];
+let signalementsEnAttente = [];
+let coffreActuelPourSignalement = null;
+let equipeSelectionnee = "";
+let deferredPrompt = null;
+let agentsSelectionnesEnsemble = new Set();
+let brouillonActuelId = null;
+const CLE_BROUILLONS = "inventaire_brouillons_v1";
+
+function escapeHtml(string) {
+  return String(string || '').replace(/[&<>"']/g, function(m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+  });
+}
+
+function reinitialiserSelectionAgents() {
+  agentsSelectionnesEnsemble.clear();
+  document.querySelectorAll(".agent-card-tile").forEach(tile => {
+    tile.classList.remove("selected");
+  });
+}
+
+function afficherErreur(msg) {
+  const divErr = document.getElementById("error");
+  if (divErr) {
+    divErr.textContent = "Erreur: " + msg;
+    divErr.style.display = "block";
+  }
+  const loading = document.getElementById("loading");
+  if (loading) {
+    loading.innerHTML = `<p style="color:red;">Erreur de chargement : ${escapeHtml(msg)}</p>`;
+  }
+}
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") fermerModalEnregistrements();
+});
+
+const API_BASE_URL = "https://cis2-ham-v2.verif-csham.workers.dev";
+
+async function apiGet(path) {
+  const response = await fetch(API_BASE_URL + path, {
+    method: "GET",
+    headers: { "Accept": "application/json" }
+  });
+  const data = await response.json();
+  if (!response.ok || data.error) throw new Error(data.error || "Erreur serveur");
+  return data;
+}
+
+async function apiPost(path, body) {
+  const response = await fetch(API_BASE_URL + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(body || {})
+  });
+  const data = await response.json();
+  if (!response.ok || data.error) throw new Error(data.error || "Erreur serveur");
+  return data;
+}
+
+window.onload = function() {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isStandalone) {
+    const btnInst = document.getElementById('btnInstallerApp');
+    if (btnInst) btnInst.style.display = 'none';
+  }
+
+  apiGet("/api/data")
+    .then(function(data) {
+      configuration = data;
+      initialiserFormulaire();
+    })
+    .catch(function(erreur) {
+      afficherErreur(erreur.message || erreur);
+    });
+};
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+function installerApplication() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        const btnInst = document.getElementById('btnInstallerApp');
+        if (btnInst) btnInst.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  } else {
+    alert("Pour installer l'application sur votre écran d'accueil :\n\n" +
+          "• Sur iPhone (Safari) : Appuyez sur le bouton 'Partager' (carré avec flèche) en bas, puis choisissez 'Sur l'écran d'accueil'.\n\n" +
+          "• Sur Android (Chrome) : Appuyez sur les 3 points en haut à droite, puis choisissez 'Ajouter à l'écran d'accueil'.");
+  }
+}
+
+function partagerApplication() {
+  const shareData = {
+    title: 'Inventaire CIS-2 HAM',
+    text: 'Accéder à l\'application d\'inventaire des véhicules et matériels :',
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+    navigator.share(shareData).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Lien de l'application copié dans le presse-papier !");
+  }
+}
+
+function genererImageGrade(url, classeSupplementaire = "", hauteur = "") {
+  if (!url) return "";
+
+  const originalUrl = String(url).trim();
+  let direct = originalUrl;
+
+  try {
+    const parsed = new URL(originalUrl);
+    const host = parsed.hostname.toLowerCase();
+
+    // ============================================================
+    // GOOGLE DRIVE
+    // ============================================================
+    // On récupère l'ID du fichier depuis les différents formats
+    // de liens Drive que tu peux mettre dans Google Sheets.
+    if (host === "drive.google.com" || host === "docs.google.com") {
+      let fileId = "";
+
+      // Format : /file/d/ID/view
+      const matchFile = originalUrl.match(/\/file\/d\/([^/?#]+)/);
+      if (matchFile) {
+        fileId = matchFile[1];
+      }
+
+      // Format : ?id=ID
+      if (!fileId) {
+        fileId = parsed.searchParams.get("id") || "";
+      }
+
+      if (fileId) {
+        /*
+         * IMPORTANT :
+         * On utilise l'URL "thumbnail" de Google Drive et non
+         * "uc?export=view".
+         *
+         * C'est beaucoup plus adapté à l'affichage <img>, notamment
+         * sur Safari/iPhone, et ça évite la page Google Drive /
+         * le téléchargement qui pouvait empêcher l'image de s'afficher.
+         */
+        direct =
+          "https://drive.google.com/thumbnail?id=" +
+          encodeURIComponent(fileId) +
+          "&sz=w1000";
+      }
+    }
+
+    // ============================================================
+    // POSTIMAGE / POSTIMG
+    // ============================================================
+    else if (
+      host === "postimg.cc" ||
+      host === "www.postimg.cc"
+    ) {
+      // Si le lien est déjà une image directe, on le conserve.
+      direct = originalUrl;
+    }
+
+  } catch (e) {
+    console.error("Erreur traitement image grade :", e);
+    direct = originalUrl;
+  }
+
+  const classe = ("grade-img " + classeSupplementaire).trim();
+  const style = hauteur ? ` style="height:${hauteur};"` : "";
+
+  /*
+   * On garde le lien original dans data-grade-original pour ne rien
+   * perdre et pour faciliter les futurs changements.
+   *
+   * Le fallback tente ensuite l'ancien système Drive si le thumbnail
+   * n'est pas disponible.
+   */
+  let fallback = "";
+
+  if (direct !== originalUrl) {
+    const oldDriveMatch = originalUrl.match(/\/file\/d\/([^/?#]+)/);
+
+    if (oldDriveMatch) {
+      const fileId = oldDriveMatch[1];
+      fallback =
+        "https://drive.google.com/uc?export=view&id=" +
+        encodeURIComponent(fileId);
+    } else {
+      try {
+        const p = new URL(originalUrl);
+        const id = p.searchParams.get("id");
+        if (id) {
+          fallback =
+            "https://drive.google.com/uc?export=view&id=" +
+            encodeURIComponent(id);
+        }
+      } catch (e) {}
+    }
+  }
+
+  return `<img src="${escapeHtml(direct)}"
+               data-grade-original="${escapeHtml(originalUrl)}"
+               data-grade-fallback="${escapeHtml(fallback)}"
+               class="${classe}"
+               alt="Grade"${style}
+               loading="lazy"
+               onerror="if(this.dataset.gradeFallback && this.src !== this.dataset.gradeFallback){this.src=this.dataset.gradeFallback;}else{this.style.display='none';}">`;
+}
+
+function genererHtmlCard(nom, typeDefault) {
+  const imageUrl = IMAGES_PARC[nom];
+  const defaultIcon = typeDefault === 'lot' ? '🧰' : (typeDefault === 'piece' ? '📟' : '🚒');
+  
+  let visuel = `<div class="engin-photo-container"><span class="engin-icon">${defaultIcon}</span></div>`;
+  
+  if (imageUrl) {
+    visuel = `
+      <div class="engin-photo-container">
+        <img src="${imageUrl}" alt="${escapeHtml(nom)}" class="engin-photo" onerror="this.parentElement.innerHTML='<span class=\\'engin-icon\\'>${defaultIcon}</span>'">
+      </div>`;
+  }
+  
+  return `${visuel}<span>${escapeHtml(nom)}</span>`;
+}
+
+function estMaterielPersonnel(nom) {
+  return String(nom || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim() === "materiel personnel";
+}
+
+function initialiserFormulaire() {
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("application").style.display = "block";
+
+  // Le matériel personnel est placé tout en haut de l'accueil.
+  const personnelCard = document.getElementById("materielPersonnelCard");
+  const personnelGrid = document.getElementById("materielPersonnelContainer");
+  personnelGrid.innerHTML = "";
+  const nomsPersonnel = (configuration.materielsOperationnels || []).filter(n => estMaterielPersonnel(n));
+  const nomsPersonnelLots = (configuration.lots || []).filter(n => /materiel\s+personnel/i.test(String(n)));
+  const materielsPersonnels = [...new Set([...nomsPersonnel, ...nomsPersonnelLots])];
+  if (materielsPersonnels.length > 0) {
+    personnelCard.style.display = "block";
+    materielsPersonnels.forEach(nom => {
+      const btn = document.createElement("div");
+      btn.className = "engin-card";
+      btn.innerHTML = genererHtmlCard(nom, 'piece');
+      btn.onclick = function() { selectionnerElement(nom); };
+      personnelGrid.appendChild(btn);
+    });
+  } else {
+    personnelCard.style.display = "none";
+  }
+
+  const gridEngins = document.getElementById("enginsContainer");
+  gridEngins.innerHTML = "";
+  if (!configuration.engins || configuration.engins.length === 0) {
+    gridEngins.innerHTML = "<p>Aucun véhicule disponible.</p>";
+  } else {
+    configuration.engins.forEach(engin => {
+      const btn = document.createElement("div");
+      btn.className = "engin-card";
+      btn.innerHTML = genererHtmlCard(engin, 'engin');
+      btn.onclick = function() { selectionnerElement(engin); };
+      gridEngins.appendChild(btn);
+    });
+  }
+
+  const gridLots = document.getElementById("lotsContainer");
+  gridLots.innerHTML = "";
+  if (configuration.lots) {
+    configuration.lots.filter(lot => !estMaterielPersonnel(lot)).forEach(lot => {
+      const btn = document.createElement("div");
+      btn.className = "engin-card";
+      btn.innerHTML = genererHtmlCard(lot, 'lot');
+      btn.onclick = function() { selectionnerElement(lot); };
+      gridLots.appendChild(btn);
+    });
+  }
+
+  const gridMaterielOp = document.getElementById("materielOperationnelContainer");
+  gridMaterielOp.innerHTML = "";
+  if (configuration.materielsOperationnels && configuration.materielsOperationnels.length > 0) {
+    configuration.materielsOperationnels.filter(mat => !estMaterielPersonnel(mat)).forEach(mat => {
+      const btn = document.createElement("div");
+      btn.className = "engin-card";
+      btn.innerHTML = genererHtmlCard(mat, 'piece');
+      btn.onclick = function() { selectionnerElement(mat); };
+      gridMaterielOp.appendChild(btn);
+    });
+  } else {
+    gridMaterielOp.innerHTML = "<p>Aucun matériel opérationnel disponible.</p>";
+  }
+
+  const zoneAgents = document.getElementById("agents");
+  zoneAgents.innerHTML = "";
+
+  reinitialiserSelectionAgents();
+
+  if (configuration.agents) {
+    configuration.agents.forEach(agentObj => {
+      const nomAgent = typeof agentObj === 'object' ? agentObj.nom : agentObj;
+      const gradeUrl = typeof agentObj === 'object' ? agentObj.gradeUrl : '';
+
+      const cardTile = document.createElement("div");
+      cardTile.className = "agent-card-tile";
+
+      let imgHtml = gradeUrl ? genererImageGrade(gradeUrl) : '';
+      
+      cardTile.innerHTML = `
+        <div class="agent-card-info">
+          ${imgHtml}
+          <span style="font-weight:600; font-size:14px; color:#171717;">${escapeHtml(nomAgent)}</span>
+        </div>
+      `;
+
+      cardTile.onclick = function() {
+        if (agentsSelectionnesEnsemble.has(nomAgent)) {
+          agentsSelectionnesEnsemble.delete(nomAgent);
+          cardTile.classList.remove("selected");
+        } else {
+          agentsSelectionnesEnsemble.add(nomAgent);
+          cardTile.classList.add("selected");
+        }
+      };
+
+      zoneAgents.appendChild(cardTile);
+    });
+  }
+
+  afficherPage(0);
+  afficherEnregistrements();
+  mettreAJourBarreEnregistrement();
+}
+
+function lireBrouillons() {
+  try {
+    const data = JSON.parse(localStorage.getItem(CLE_BROUILLONS) || "[]");
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function ecrireBrouillons(brouillons) {
+  try {
+    localStorage.setItem(CLE_BROUILLONS, JSON.stringify(brouillons));
+  } catch (e) {
+    alert("Impossible d'enregistrer ce contrôle sur cet appareil.");
+  }
+}
+
+function trouverAgentConfiguration(nom) {
+  return (configuration.agents || []).find(a => String(typeof a === 'object' ? a.nom : a) === String(nom));
+}
+
+function creerCarteEnregistrement(brouillon) {
+  const item = document.createElement("div");
+  item.className = "enregistrement-item";
+  item.onclick = function() { restaurerBrouillon(brouillon.id); };
+
+  const photoUrl = IMAGES_PARC[brouillon.element] || "";
+  const photo = document.createElement("img");
+  photo.className = "enregistrement-photo";
+  photo.alt = brouillon.element || "Élément";
+  photo.src = photoUrl || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+  photo.onerror = function() { this.style.visibility = "hidden"; };
+
+  const info = document.createElement("div");
+  info.className = "enregistrement-info";
+  const date = new Date(brouillon.dateEnregistrement);
+  const dateTxt = isNaN(date.getTime()) ? "Date inconnue" : date.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+  const agents = Array.isArray(brouillon.agents) ? brouillon.agents : [];
+  let agentsHtml = "";
+  agents.forEach(nom => {
+    const agent = trouverAgentConfiguration(nom);
+    const gradeUrl = agent && typeof agent === 'object' ? agent.gradeUrl : '';
+    agentsHtml += `<span class="enregistrement-agent">${gradeUrl ? genererImageGrade(gradeUrl) : ''}${escapeHtml(nom)}</span>`;
+  });
+
+  info.innerHTML = `
+    <div class="enregistrement-titre">${escapeHtml(brouillon.element || "Contrôle")}</div>
+    <div class="enregistrement-meta">💾 Enregistré le ${escapeHtml(dateTxt)}<br>👥 ${escapeHtml(brouillon.equipe || "Équipe non sélectionnée")}</div>
+    <div class="enregistrement-agents">${agentsHtml || '<span class="enregistrement-meta">Aucun agent sélectionné</span>'}</div>
+  `;
+
+  const supprimer = document.createElement("button");
+  supprimer.type = "button";
+  supprimer.className = "btn-supprimer-enregistrement";
+  supprimer.title = "Supprimer cet enregistrement";
+  supprimer.textContent = "×";
+  supprimer.onclick = function(e) {
+    e.stopPropagation();
+    if (!confirm("Supprimer cet enregistrement ?")) return;
+    const liste = lireBrouillons().filter(b => b.id !== brouillon.id);
+    ecrireBrouillons(liste);
+    if (brouillonActuelId === brouillon.id) brouillonActuelId = null;
+    afficherEnregistrements();
+  };
+
+  item.appendChild(photo);
+  item.appendChild(info);
+  item.appendChild(supprimer);
+  return item;
+}
+
+function afficherEnregistrements() {
+  const zone = document.getElementById("enregistrementsContainer");
+  if (!zone) return;
+  zone.innerHTML = "";
+  const brouillons = lireBrouillons().sort((a, b) => new Date(b.dateEnregistrement) - new Date(a.dateEnregistrement));
+  const btn = document.getElementById("btnHeaderSaved");
+  if (btn) btn.style.display = brouillons.length > 0 ? "inline-flex" : "inline-flex";
+  if (brouillons.length === 0) {
+    zone.innerHTML = '<div class="enregistrements-vide">Aucun contrôle enregistré pour le moment.</div>';
+    return;
+  }
+  brouillons.forEach(b => zone.appendChild(creerCarteEnregistrement(b)));
+}
+
+function ouvrirModalEnregistrements() {
+  afficherEnregistrements();
+  const modal = document.getElementById("modalEnregistrements");
+  if (modal) modal.classList.add("active");
+}
+
+function fermerModalEnregistrements(event) {
+  if (event && event.target && event.target.id !== "modalEnregistrements") return;
+  const modal = document.getElementById("modalEnregistrements");
+  if (modal) modal.classList.remove("active");
+}
+
+function creerSnapshotBrouillon() {
+  return {
+    id: brouillonActuelId || ("b_" + Date.now()),
+    dateEnregistrement: new Date().toISOString(),
+    element: elementSelectionne,
+    equipe: equipeSelectionnee,
+    agents: Array.from(agentsSelectionnesEnsemble),
+    parties: Array.from(partiesSelectionnees),
+    // On mémorise aussi les coffres construits et la page exacte.
+    coffres: Array.isArray(coffresEngin) ? coffresEngin.map(c => c.nom) : [],
+    page: pageActuelle,
+    pageCoffre: (pageActuelle >= 2 && coffresEngin[pageActuelle - 2]) ? coffresEngin[pageActuelle - 2].nom : null,
+    resultats: JSON.parse(JSON.stringify(resultats || [])),
+    signalements: JSON.parse(JSON.stringify(signalementsEnAttente || []))
+  };
+}
+
+function enregistrerBrouillon() {
+  if (!elementSelectionne) {
+    alert("Sélectionnez d'abord un véhicule, un lot ou un matériel.");
+    return;
+  }
+
+  const snapshot = creerSnapshotBrouillon();
+  const brouillons = lireBrouillons();
+  const index = brouillons.findIndex(b => b.id === snapshot.id);
+  if (index >= 0) brouillons[index] = snapshot;
+  else brouillons.push(snapshot);
+  brouillonActuelId = snapshot.id;
+  ecrireBrouillons(brouillons);
+  afficherEnregistrements();
+  mettreAJourBarreEnregistrement();
+
+  const btn = document.getElementById("btnHeaderSave");
+  if (btn) {
+    const ancien = btn.textContent;
+    btn.textContent = "✅ Enregistré";
+    btn.classList.add("saved");
+    setTimeout(() => { btn.textContent = ancien; btn.classList.remove("saved"); }, 1600);
+  }
+}
+
+function supprimerBrouillonActuel() {
+  if (!brouillonActuelId) return;
+  ecrireBrouillons(lireBrouillons().filter(b => b.id !== brouillonActuelId));
+  brouillonActuelId = null;
+  afficherEnregistrements();
+}
+
+function appliquerResultatsVisuels() {
+  (resultats || []).forEach(r => {
+    const coffreIndex = coffresEngin.findIndex(c => c.nom === r.coffre);
+    if (coffreIndex < 0) return;
+    const materielIndex = coffresEngin[coffreIndex].materiels.findIndex(m => m.nom === r.materiel && (m.groupe || "") === (r.groupe || ""));
+    if (materielIndex < 0) return;
+    const cle = "m_" + coffreIndex + "_" + materielIndex;
+    const btns = document.querySelectorAll(`[data-key="${cle}"]`);
+    btns.forEach(btn => btn.classList.toggle("selected", btn.dataset.status === r.statut));
+    const missingBox = document.getElementById("missing-" + cle);
+    if (missingBox) {
+      if (r.statut === "manquant") {
+        missingBox.classList.add("visible");
+        missingBox.querySelectorAll(".quantity").forEach(b => b.classList.toggle("selected", Number(b.dataset.qte) === Number(r.quantiteManquante)));
+      } else {
+        missingBox.classList.remove("visible");
+      }
+    }
+  });
+}
+
+function restaurerBrouillon(id) {
+  const brouillon = lireBrouillons().find(b => b.id === id);
+  if (!brouillon) return;
+
+  fermerModalEnregistrements();
+  brouillonActuelId = brouillon.id;
+  elementSelectionne = brouillon.element;
+  equipeSelectionnee = brouillon.equipe || "";
+  agentsSelectionnesEnsemble = new Set(brouillon.agents || []);
+  resultats = JSON.parse(JSON.stringify(brouillon.resultats || []));
+  signalementsEnAttente = JSON.parse(JSON.stringify(brouillon.signalements || []));
+
+  // Les anciennes versions n'enregistraient pas toujours les divisions.
+  // Pour les nouveaux enregistrements, on reprend exactement les parties.
+  let partiesSauvegardees = Array.isArray(brouillon.parties) ? brouillon.parties.filter(Boolean) : [];
+
+  // Compatibilité avec les enregistrements déjà présents : si les parties
+  // n'ont pas été sauvegardées, on les reconstitue à partir des résultats
+  // enregistrés (ou, à défaut, des coffres sauvegardés).
+  if (partiesSauvegardees.length === 0 && Array.isArray(brouillon.resultats) && brouillon.resultats.length > 0) {
+    const parties = new Set();
+    const mats = configuration.materiels.filter(m => String(m.engin).toLowerCase() === String(elementSelectionne).toLowerCase());
+    brouillon.resultats.forEach(r => {
+      const m = mats.find(x => x.nom === r.materiel && (x.groupe || "") === (r.groupe || "") && (!r.coffre || x.coffre === r.coffre));
+      if (m) {
+        const p = m.division || m.zone;
+        if (p) parties.add(p);
+      }
+    });
+    partiesSauvegardees = Array.from(parties);
+  }
+
+  // Dernier filet de sécurité pour les très anciens enregistrements : on
+  // évite absolument le message "Veuillez sélectionner au moins une partie".
+  // Toutes les parties disponibles sont alors reprises.
+  if (partiesSauvegardees.length === 0) {
+    const mats = configuration.materiels.filter(m => String(m.engin).toLowerCase() === String(elementSelectionne).toLowerCase());
+    partiesSauvegardees = [...new Set(mats.map(m => m.division || m.zone).filter(p => p && p !== "GENERAL"))];
+    if (partiesSauvegardees.length === 0) partiesSauvegardees = ["GENERAL"];
+  }
+
+  partiesSelectionnees = new Set(partiesSauvegardees);
+
+  // Reconstruit l'écran de sélection sans effacer les parties restaurées.
+  selectionnerElement(elementSelectionne, true);
+
+  document.querySelectorAll("#partiesContainer .partie-card").forEach(btn => {
+    btn.classList.toggle("selected", partiesSelectionnees.has(btn.dataset.partie));
+  });
+
+  document.querySelectorAll(".team-option").forEach(btn => {
+    btn.classList.toggle("selected", trouverNomEquipeReel(btn.dataset.teamLabel) === equipeSelectionnee);
+  });
+
+  document.querySelectorAll(".agent-card-tile").forEach(tile => {
+    const nom = tile.querySelector("span") ? tile.querySelector("span").textContent : "";
+    tile.classList.toggle("selected", agentsSelectionnesEnsemble.has(nom));
+  });
+
+  // Mode restauration : aucune validation ne doit interrompre la reprise.
+  // Les réponses déjà enregistrées ne sont jamais réinitialisées.
+  demarrerInventaire(true);
+  appliquerResultatsVisuels();
+
+  // Revenir exactement à la page enregistrée. Si elle n'est plus valide,
+  // utiliser le coffre enregistré comme repère.
+  let cible = Number(brouillon.page);
+  if (!Number.isFinite(cible) || cible < 2 || cible >= nombrePagesTotal) {
+    const nomCoffre = brouillon.pageCoffre;
+    const idx = coffresEngin.findIndex(c => c.nom === nomCoffre);
+    cible = idx >= 0 ? idx + 2 : 2;
+  }
+  pageActuelle = Math.max(2, Math.min(cible, nombrePagesTotal - 1));
+  afficherPage(pageActuelle);
+  mettreAJourBarreEnregistrement();
+}
+
+function mettreAJourBarreEnregistrement() {
+  const btnSave = document.getElementById("btnHeaderSave");
+  const btnSaved = document.getElementById("btnHeaderSaved");
+  const active = !!elementSelectionne && pageActuelle !== 0 && pageActuelle !== 'responsable' && pageActuelle !== 'succes';
+  if (btnSave) btnSave.style.display = active ? "inline-flex" : "none";
+  if (btnSaved) btnSaved.style.display = "inline-flex";
+}
+
+function normaliserEquipe(valeur) {
+  return String(valeur || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function trouverNomEquipeReel(libelle) {
+  const lettre = normaliserEquipe(libelle).slice(-1);
+
+  if (configuration && configuration.equipes) {
+    const correspondance = configuration.equipes.find(eq => {
+      const nom = typeof eq === "object" ? eq.nom : eq;
+      const n = normaliserEquipe(nom);
+      return n === normaliserEquipe(libelle) ||
+             n === "equipe " + lettre ||
+             n === "equipe" + lettre ||
+             n === lettre;
+    });
+
+    if (correspondance) {
+      return typeof correspondance === "object"
+        ? correspondance.nom
+        : correspondance;
+    }
+  }
+
+  return libelle;
+}
+
+function selectionnerEquipe(libelle, bouton) {
+  equipeSelectionnee = trouverNomEquipeReel(libelle);
+
+  document.querySelectorAll(".team-option").forEach(btn => {
+    btn.classList.remove("selected");
+  });
+
+  if (bouton) {
+    bouton.classList.add("selected");
+  }
+}
+
+function selectionnerElement(nom, conserverParties = false) {
+  // Une nouvelle sélection depuis l'accueil démarre un nouveau brouillon.
+  if (elementSelectionne !== nom && pageActuelle === 0) brouillonActuelId = null;
+  elementSelectionne = nom;
+  document.getElementById("titreEnginChoisi").textContent = nom;
+
+  // Lors de la reprise d'un contrôle enregistré, les divisions / parties
+  // sélectionnées doivent être conservées exactement comme elles étaient.
+  // Pour une nouvelle sélection depuis l'accueil, on repart bien de zéro.
+  if (!conserverParties) {
+    partiesSelectionnees.clear();
+  }
+
+  const materielsElement = configuration.materiels.filter(m => m.engin.toLowerCase() === nom.toLowerCase());
+  const gridParties = document.getElementById("partiesContainer");
+  const cardParties = document.getElementById("cardParties");
+  const btnSelectAll = document.getElementById("btnSelectAll");
+  
+  gridParties.innerHTML = "";
+
+  partiesUniquesListe = [...new Set(materielsElement.map(m => m.division || m.zone))].filter(p => p && p !== "" && p !== "GENERAL");
+
+  if (partiesUniquesListe.length <= 1) {
+    const nomUnique = partiesUniquesListe.length === 1 ? partiesUniquesListe[0] : "GENERAL";
+    partiesSelectionnees.add(nomUnique);
+    cardParties.style.display = "none";
+  } else {
+    cardParties.style.display = "block";
+    btnSelectAll.style.display = "block";
+
+    partiesUniquesListe.forEach(p => {
+      const btnPartie = document.createElement("div");
+      btnPartie.className = "partie-card";
+      btnPartie.innerHTML = "📦 " + escapeHtml(p);
+      btnPartie.dataset.partie = p;
+
+      btnPartie.onclick = function() {
+        if (partiesSelectionnees.has(p)) {
+          partiesSelectionnees.delete(p);
+          btnPartie.classList.remove("selected");
+        } else {
+          partiesSelectionnees.add(p);
+          btnPartie.classList.add("selected");
+        }
+      };
+      gridParties.appendChild(btnPartie);
+    });
+  }
+
+  afficherPage(1);
+}
+
+function toutSelectionnerComplet() {
+  partiesSelectionnees.clear();
+  const tousLesBoutons = document.querySelectorAll("#partiesContainer .partie-card");
+  
+  partiesUniquesListe.forEach(p => partiesSelectionnees.add(p));
+  
+  tousLesBoutons.forEach(btn => {
+    btn.classList.add("selected");
+  });
+}
+
+function retourChoixEngin() {
+  elementSelectionne = null;
+  partiesSelectionnees.clear();
+  reinitialiserSelectionAgents();
+  afficherPage(0);
+}
+
+function demarrerInventaire(conserverEtat = false) {
+  const equipe = equipeSelectionnee;
+  const agentsActifs = Array.from(agentsSelectionnesEnsemble);
+
+  if (!equipe) { alert("Veuillez sélectionner une équipe."); return; }
+  if (agentsActifs.length === 0) { alert("Sélectionnez au moins un agent."); return; }
+
+  if (partiesSelectionnees.size === 0) {
+    alert("Veuillez sélectionner au moins une partie.");
+    return;
+  }
+
+  let materielsElement = configuration.materiels.filter(m => m.engin.toLowerCase() === elementSelectionne.toLowerCase());
+
+  if (!(partiesSelectionnees.has("GENERAL") && partiesSelectionnees.size === 1)) {
+    materielsElement = materielsElement.filter(m => 
+      partiesSelectionnees.has(m.division) || partiesSelectionnees.has(m.zone)
+    );
+  }
+
+  if (materielsElement.length === 0) {
+    alert("Aucun matériel enregistré pour la sélection effectuée.");
+    return;
+  }
+
+  const coffresMap = new Map();
+  materielsElement.forEach(m => {
+    if (!coffresMap.has(m.coffre)) {
+      coffresMap.set(m.coffre, { nom: m.coffre, materiels: [] });
+    }
+    coffresMap.get(m.coffre).materiels.push(m);
+  });
+
+  coffresEngin = Array.from(coffresMap.values());
+
+  // Lors d'une reprise d'enregistrement, on conserve exactement les
+  // réponses et signalements qui avaient été enregistrés.
+  if (!conserverEtat) {
+    resultats = [];
+    signalementsEnAttente = [];
+  }
+  
+  construirePagesCoffres();
+  
+  nombrePagesTotal = 2 + coffresEngin.length;
+  pageActuelle = 2;
+  afficherPage(pageActuelle);
+}
+
+function construirePagesCoffres() {
+  const zoneCoffres = document.getElementById("coffres");
+  zoneCoffres.innerHTML = "";
+
+  coffresEngin.forEach((coffre, coffreIndex) => {
+    const pageIndex = coffreIndex + 2;
+    const page = document.createElement("div");
+    page.id = "page-" + pageIndex;
+    page.className = "page";
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const titre = document.createElement("div");
+    titre.className = "section-title";
+    titre.textContent = "🧰 " + coffre.nom + " (" + elementSelectionne + ")";
+    card.appendChild(titre);
+
+    const notificationToast = document.createElement("div");
+    notificationToast.id = "toast-signalement-" + pageIndex;
+    notificationToast.className = "signalement-toast";
+    card.appendChild(notificationToast);
+
+    const controleIncompletToast = document.createElement("div");
+    controleIncompletToast.id = "toast-controle-incomplet-" + pageIndex;
+    controleIncompletToast.className = "controle-incomplet-toast";
+    controleIncompletToast.innerHTML = `
+      <div class="controle-incomplet-modal" role="dialog" aria-modal="true" aria-labelledby="controle-incomplet-titre-${pageIndex}">
+        <div class="controle-incomplet-titre" id="controle-incomplet-titre-${pageIndex}">⚠️ Contrôle incomplet</div>
+        <div class="controle-incomplet-intro">Vous n’avez pas encore renseigné les matériels suivants :</div>
+        <ol class="controle-incomplet-liste"></ol>
+        <button type="button" onclick="fermerAlerteControleIncomplet(${pageIndex})">Fermer et continuer le contrôle</button>
+      </div>`;
+    document.body.appendChild(controleIncompletToast);
+
+    const groupesMap = new Map();
+    const materielsSeuls = [];
+
+    coffre.materiels.forEach((materiel, idx) => {
+      materiel.indexGlobal = idx;
+      if (materiel.groupe && materiel.groupe !== "") {
+        if (!groupesMap.has(materiel.groupe)) groupesMap.set(materiel.groupe, []);
+        groupesMap.get(materiel.groupe).push(materiel);
+      } else {
+        materielsSeuls.push(materiel);
+      }
+    });
+
+    materielsSeuls.forEach(m => creerMateriel(card, coffre, m, coffreIndex, m.indexGlobal));
+
+    groupesMap.forEach((liste, nomGroupe) => {
+      const groupCard = document.createElement("div");
+      groupCard.className = "group-card";
+      const groupTitle = document.createElement("div");
+      groupTitle.className = "group-title";
+      groupTitle.textContent = "🧰 " + nomGroupe;
+      groupCard.appendChild(groupTitle);
+
+      liste.forEach(m => creerMateriel(groupCard, coffre, m, coffreIndex, m.indexGlobal));
+      card.appendChild(groupCard);
+    });
+
+    const navigation = document.createElement("div");
+    navigation.className = "navigation";
+
+    const precedent = document.createElement("button");
+    precedent.className = "previous";
+    precedent.textContent = "← Précédent";
+    precedent.onclick = pagePrecedente;
+
+    const suivant = document.createElement("button");
+    suivant.className = "next";
+    suivant.textContent = "Suivant →";
+    suivant.onclick = pageSuivante;
+
+    navigation.appendChild(precedent);
+    navigation.appendChild(suivant);
+
+    const reportContainer = document.createElement("div");
+    reportContainer.className = "report-container";
+
+    const btnReport = document.createElement("button");
+    btnReport.className = "btn-report";
+    btnReport.type = "button";
+    btnReport.innerHTML = "⚠️ Signaler un problème sur un matériel de ce coffre";
+    btnReport.onclick = function() { ouvrirModalSignalement(coffre); };
+
+    reportContainer.appendChild(btnReport);
+
+    page.appendChild(card);
+    page.appendChild(navigation);
+    page.appendChild(reportContainer);
+    zoneCoffres.appendChild(page);
+  });
+}
+
+function creerMateriel(parent, coffre, materiel, coffreIndex, materielIndex) {
+  const cle = "m_" + coffreIndex + "_" + materielIndex;
+  const qteAttendue = Number(materiel.quantite);
+
+  const bloc = document.createElement("div");
+  bloc.className = "material";
+
+  const nom = document.createElement("div");
+  nom.className = "material-name";
+  nom.textContent = qteAttendue + " × " + materiel.nom;
+  bloc.appendChild(nom);
+
+  const status = document.createElement("div");
+  status.className = "status";
+
+  // Aucun statut n'est coché par défaut !
+  const present = creerBoutonStatut("✓ Présent", "present", cle, () => choisirStatut(cle, "present"));
+  const absent = creerBoutonStatut("✕ Absent", "absent", cle, () => choisirStatut(cle, "absent"));
+
+  status.appendChild(present);
+
+  if (qteAttendue >= 2) {
+    const manquant = creerBoutonStatut("⚠️ Manque", "manquant", cle, () => choisirStatut(cle, "manquant"));
+    status.appendChild(manquant);
+  }
+
+  status.appendChild(absent);
+  bloc.appendChild(status);
+
+  if (qteAttendue >= 2) {
+    const missingBox = document.createElement("div");
+    missingBox.id = "missing-" + cle;
+    missingBox.className = "missing-box";
+
+    const titre = document.createElement("div");
+    titre.className = "missing-title";
+    if (qteAttendue === 2) {
+      // Pour exactement 2 exemplaires, "Manque" signifie toujours 1 exemplaire.
+      // On affiche directement le résultat de façon naturelle.
+      titre.textContent = "1 × " + materiel.nom + " — MANQUANT";
+    } else {
+      titre.textContent = "Quantité manquante :";
+    }
+    missingBox.appendChild(titre);
+
+    const quantities = document.createElement("div");
+    if (qteAttendue === 2) quantities.style.display = "none";
+    quantities.className = "quantities";
+
+    // Cas particulier : lorsqu'il y en a exactement 2,
+    // "Manque" signifie forcément qu'il en manque 1.
+    // C'est la seule situation où 1 est sélectionné automatiquement.
+    for (let q = 1; q <= qteAttendue - 1; q++) {
+      const qBtn = document.createElement("button");
+      qBtn.type = "button";
+      qBtn.className = "quantity";
+      qBtn.dataset.qte = q;
+      qBtn.textContent = q;
+      qBtn.onclick = function() { choisirQuantiteManquante(cle, q, qBtn); };
+
+      if (qteAttendue === 2 && q === 1) {
+        qBtn.classList.add("selected");
+      }
+
+      quantities.appendChild(qBtn);
+    }
+    missingBox.appendChild(quantities);
+    bloc.appendChild(missingBox);
+  }
+
+  parent.appendChild(bloc);
+}
+
+function creerBoutonStatut(texte, type, cle, callback) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.textContent = texte;
+  btn.dataset.status = type;
+  btn.dataset.key = cle;
+
+  btn.onclick = function() {
+    const parent = btn.parentElement;
+    parent.querySelectorAll("button").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    callback();
+  };
+  return btn;
+}
+
+function choisirStatut(cle, status) {
+  const missingBox = document.getElementById("missing-" + cle);
+  
+  let coffreIdx = parseInt(cle.split("_")[1]);
+  let matIdx = parseInt(cle.split("_")[2]);
+  let coffre = coffresEngin[coffreIdx];
+  let materiel = coffre.materiels[matIdx];
+  let qteAttendue = Number(materiel.quantite);
+
+  if (missingBox) {
+    if (status === "manquant") {
+      missingBox.classList.add("visible");
+
+      if (qteAttendue === 2) {
+        // Cas unique : sur 2 exemplaires, "Manque" = 1 manquant.
+        const boutonUn = missingBox.querySelector('.quantity[data-qte="1"]');
+        missingBox.querySelectorAll(".quantity").forEach(b => b.classList.remove("selected"));
+        if (boutonUn) boutonUn.classList.add("selected");
+        enregistrerResultat(coffre.nom, materiel.groupe, materiel.nom, "manquant", 1);
+      } else {
+        // Pour 3 exemplaires ou plus : aucune quantité ne doit être
+        // choisie automatiquement. L'agent doit cliquer sur 1, 2, 3...
+        missingBox.querySelectorAll(".quantity").forEach(b => b.classList.remove("selected"));
+        resultats = resultats.filter(r => !(r.coffre === coffre.nom && r.groupe === materiel.groupe && r.materiel === materiel.nom));
+      }
+    } else {
+      missingBox.classList.remove("visible");
+      let qteManque = status === "absent" ? qteAttendue : 0;
+      enregistrerResultat(coffre.nom, materiel.groupe, materiel.nom, status, qteManque);
+    }
+  } else {
+    let qteManque = status === "absent" ? qteAttendue : 0;
+    enregistrerResultat(coffre.nom, materiel.groupe, materiel.nom, status, qteManque);
+  }
+}
+
+function choisirQuantiteManquante(cle, qte, btnPresse) {
+  const missingBox = document.getElementById("missing-" + cle);
+  if (missingBox) {
+    missingBox.querySelectorAll(".quantity").forEach(b => b.classList.remove("selected"));
+    btnPresse.classList.add("selected");
+  }
+
+  let coffreIdx = parseInt(cle.split("_")[1]);
+  let matIdx = parseInt(cle.split("_")[2]);
+  let coffre = coffresEngin[coffreIdx];
+  let materiel = coffre.materiels[matIdx];
+
+  enregistrerResultat(coffre.nom, materiel.groupe, materiel.nom, "manquant", qte);
+}
+
+function enregistrerResultat(coffreNom, groupeNom, materielNom, statut, quantiteManquante) {
+  const index = resultats.findIndex(r => r.coffre === coffreNom && r.groupe === groupeNom && r.materiel === materielNom);
+  const item = {
+    coffre: coffreNom,
+    groupe: groupeNom || "",
+    materiel: materielNom,
+    statut: statut,
+    quantiteManquante: Number(quantiteManquante) || 0
+  };
+
+  if (index >= 0) {
+    resultats[index] = item;
+  } else {
+    resultats.push(item);
+  }
+}
+
+function afficherPage(index) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  
+  if (index === 0) {
+    document.getElementById("page-0").classList.add("active");
+  } else if (index === 1) {
+    document.getElementById("page-1").classList.add("active");
+  } else if (index === 'responsable') {
+    document.getElementById("page-responsable").classList.add("active");
+  } else if (index < nombrePagesTotal) {
+    const targetPage = document.getElementById("page-" + index);
+    if (targetPage) targetPage.classList.add("active");
+  } else {
+    afficherPageFinale();
+    document.getElementById("page-finale").classList.add("active");
+  }
+  
+  window.scrollTo(0, 0);
+  mettreAJourBarreEnregistrement();
+  if (index === 0) afficherEnregistrements();
+}
+
+function fermerAlerteControleIncomplet(pageIndex) {
+  const toast = document.getElementById("toast-controle-incomplet-" + pageIndex);
+  if (toast) toast.style.display = "none";
+}
+
+function pageSuivante() {
+  // Impossible de passer à la page suivante tant que chaque matériel
+  // de la page actuelle n'a pas reçu Présent, Manque ou Absent.
+  if (pageActuelle >= 2 && pageActuelle < nombrePagesTotal) {
+    const coffreIndex = pageActuelle - 2;
+    const coffre = coffresEngin[coffreIndex];
+
+    if (coffre) {
+      const controlesEffectues = new Set(
+        (resultats || []).map(r => `${r.coffre}|||${r.groupe || ""}|||${r.materiel}`)
+      );
+
+      const materielsNonControles = coffre.materiels.filter(m => {
+        const cle = `${coffre.nom}|||${m.groupe || ""}|||${m.nom}`;
+        return !controlesEffectues.has(cle);
+      });
+
+      if (materielsNonControles.length > 0) {
+        const toast = document.getElementById("toast-controle-incomplet-" + pageActuelle);
+
+        if (toast) {
+          const liste = toast.querySelector(".controle-incomplet-liste");
+          if (liste) {
+            liste.innerHTML = materielsNonControles
+              .map(m => `<li>${escapeHtml(m.nom)}</li>`)
+              .join("");
+          }
+          toast.style.display = "flex";
+        }
+
+        // On ne déplace plus automatiquement la page et on ne met plus
+        // de cadre orange sur les matériels oubliés.
+        return;
+      }
+    }
+  }
+
+  pageActuelle++;
+  afficherPage(pageActuelle);
+}
+
+function pagePrecedente() {
+  pageActuelle--;
+  if (pageActuelle < 0) pageActuelle = 0;
+  afficherPage(pageActuelle);
+}
+
+function afficherPageFinale() {
+  const resume = document.getElementById("resume");
+  const equipe = equipeSelectionnee;
+  const agentsActifs = Array.from(agentsSelectionnesEnsemble);
+
+  let html = "<p><strong>Élément :</strong> " + escapeHtml(elementSelectionne) + "<br>";
+  html += "<strong>Équipe :</strong> " + escapeHtml(equipe) + "<br>";
+  html += "<strong>Agent(s) :</strong> " + escapeHtml(agentsActifs.join(", ")) + "</p>";
+
+  const anomalies = resultats.filter(r => r.statut === "manquant" || r.statut === "absent");
+
+  if (anomalies.length === 0) {
+    html += "<p style='color: green; font-weight: bold;'>✅ Aucun matériel manquant ou absent identifié.</p>";
+  } else {
+    html += "<p style='color: #dc2626; font-weight: bold;'>⚠️ Anomalies constatées :</p><ul>";
+    anomalies.forEach(a => {
+      let matDesc = (a.groupe && a.groupe !== "-") ? a.groupe + " - " + a.materiel : a.materiel;
+      if (a.statut === "absent") {
+        html += "<li style='color: #dc2626;'><strong>" + escapeHtml(a.coffre) + " : " + escapeHtml(matDesc) + " (ABSENT)</strong></li>";
+      } else {
+        html += "<li style='color: #ea580c;'><strong>" + escapeHtml(a.coffre) + " : " + escapeHtml(matDesc) + " (" + a.quantiteManquante + " manquant(s))</strong></li>";
+      }
+    });
+    html += "</ul>";
+  }
+
+  if (signalementsEnAttente.length > 0) {
+    html += "<p style='color: #d97706; font-weight: bold;'>⚠️ Signalement(s) joint(s) : " + signalementsEnAttente.length + "</p>";
+  }
+
+  resume.innerHTML = html;
+}
+
+function ouvrirModalSignalement(coffre) {
+  coffreActuelPourSignalement = coffre;
+
+  document.getElementById("modalCoffreTitre").textContent =
+    "🧰 Coffre / Zone : " + coffre.nom;
+
+  const container = document.getElementById("sigMaterielsContainer");
+  container.innerHTML = "";
+
+  coffre.materiels.forEach(m => {
+    const label = document.createElement("label");
+    label.className = "checkbox-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = (m.groupe ? m.groupe + " - " : "") + m.nom;
+
+    const text = document.createElement("span");
+    text.textContent = (m.groupe ? m.groupe + " - " : "") + m.nom;
+
+    label.appendChild(checkbox);
+    label.appendChild(text);
+    container.appendChild(label);
+  });
+
+  document.getElementById("sigObservation").value = "";
+
+  const btnSubmit = document.getElementById("btnValiderSig");
+  btnSubmit.disabled = false;
+  btnSubmit.textContent = "Valider le signalement";
+
+  document.getElementById("modalSignalement").classList.add("active");
+}
+
+function fermerModalSignalement() {
+  document.getElementById("modalSignalement").classList.remove("active");
+}
+
+function enregistrerSignalementLocalement() {
+  const checkboxes = document.querySelectorAll(
+    "#sigMaterielsContainer input[type='checkbox']:checked"
+  );
+
+  const materielsChoisis = Array.from(checkboxes).map(c => c.value);
+  const observation = document.getElementById("sigObservation").value.trim();
+
+  if (materielsChoisis.length === 0 && !observation) {
+    alert("Veuillez sélectionner au moins un matériel ou saisir une observation.");
+    return;
+  }
+
+  signalementsEnAttente.push({
+    coffre: coffreActuelPourSignalement.nom,
+    materiels: materielsChoisis,
+    observation: observation
+  });
+
+  fermerModalSignalement();
+
+  const toast = document.getElementById("toast-signalement-" + pageActuelle);
+
+  if (toast) {
+    toast.textContent =
+      "✅ Signalement sur le coffre " +
+      coffreActuelPourSignalement.nom +
+      " bien enregistré !";
+
+    toast.style.display = "block";
+
+    setTimeout(() => {
+      toast.style.display = "none";
+    }, 4000);
+  }
+}
+
+function envoyerInventaireFinal() {
+  const btnSend = document.getElementById("sendButton");
+  const divSuccess = document.getElementById("success");
+  const divError = document.getElementById("error");
+
+  btnSend.disabled = true;
+  btnSend.textContent = "⏳ Envoi en cours...";
+  divSuccess.style.display = "none";
+  divError.style.display = "none";
+
+  const equipe = equipeSelectionnee;
+  const agentsActifs = Array.from(agentsSelectionnesEnsemble);
+
+  const payload = {
+    engin: elementSelectionne,
+    equipe: equipe,
+    agents: agentsActifs,
+    resultats: resultats,
+    signalements: signalementsEnAttente
+  };
+
+  apiPost("/api/inventory", payload)
+    .then(function(response) {
+      supprimerBrouillonActuel();
+      btnSend.disabled = false;
+      btnSend.textContent = "Envoyer l'inventaire";
+      
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.getElementById("page-succes").classList.add("active");
+      window.scrollTo(0, 0);
+    })
+    .catch(function(err) {
+      btnSend.disabled = false;
+      btnSend.textContent = "Envoyer l'inventaire";
+      divError.textContent = "Erreur : " + (err.message || err);
+      divError.style.display = "block";
+    });
+}
+
+function retourAccueilDepuisSucces() {
+  fermerModalEnregistrements();
+  brouillonActuelId = null;
+  elementSelectionne = null;
+  partiesSelectionnees.clear();
+  resultats = [];
+  signalementsEnAttente = [];
+  reinitialiserSelectionAgents();
+  
+  equipeSelectionnee = "";
+  document.querySelectorAll(".team-option").forEach(btn => btn.classList.remove("selected"));
+
+  afficherPage(0);
+}
+
+let pinSaisi = "";
+
+function mettreAJourAffichagePin() {
+  const dots = document.querySelectorAll("#pinDisplay .pin-dot");
+
+  dots.forEach((dot, index) => {
+    dot.classList.toggle("filled", index < pinSaisi.length);
+  });
+}
+
+function reinitialiserPin() {
+  pinSaisi = "";
+  mettreAJourAffichagePin();
+
+  const error = document.getElementById("pinError");
+  if (error) error.style.display = "none";
+}
+
+function ouvrirModalPin() {
+  reinitialiserPin();
+  document.getElementById("modalPin").classList.add("active");
+}
+
+function fermerModalPin() {
+  document.getElementById("modalPin").classList.remove("active");
+  reinitialiserPin();
+}
+
+function saisirChiffrePin(chiffre) {
+  if (pinSaisi.length >= 4) return;
+
+  pinSaisi += chiffre;
+  mettreAJourAffichagePin();
+
+  // Validation automatique dès le 4e chiffre.
+  if (pinSaisi.length === 4) {
+    validerPin();
+  }
+}
+
+function effacerDernierChiffrePin() {
+  if (pinSaisi.length > 0) {
+    pinSaisi = pinSaisi.slice(0, -1);
+    mettreAJourAffichagePin();
+  }
+}
+
+function validerPin() {
+  if (pinSaisi.length !== 4) return;
+
+  const pinTeste = pinSaisi;
+  const error = document.getElementById("pinError");
+
+  apiPost("/api/pin", { pin: pinTeste })
+    .then(function(valide) {
+      if (valide) {
+        fermerModalPin();
+        chargerEspaceResponsable();
+      } else {
+        if (error) {
+          error.textContent = "Mot de passe incorrect";
+          error.style.display = "block";
+        }
+
+        setTimeout(() => {
+          reinitialiserPin();
+        }, 850);
+      }
+    })
+    .catch(function() {
+      if (error) {
+        error.textContent = "Impossible de vérifier le code";
+        error.style.display = "block";
+      }
+
+      setTimeout(() => {
+        reinitialiserPin();
+      }, 1000);
+    });
+}
+
+function chargerEspaceResponsable() {
+  const container = document.getElementById("contenuSuiviResp");
+  container.innerHTML = "⏳ Chargement du suivi...";
+  afficherPage('responsable');
+
+  apiGet("/api/suivi")
+    .then(function(donnees) {
+      afficherSuiviResponsable(donnees);
+    })
+    .catch(function(err) {
+      container.innerHTML = "<p style='color:red;'>Erreur : " + escapeHtml(err.message || err) + "</p>";
+    });
+}
+
+function afficherSuiviResponsable(suivi) {
+  const container = document.getElementById("contenuSuiviResp");
+  container.innerHTML = "";
+
+  if (!suivi || suivi.length === 0) {
+    container.innerHTML = "<p>Aucune donnée disponible.</p>";
+    return;
+  }
+
+  suivi.forEach(item => {
+    const card = document.createElement("div");
+    let classeStatut = "statut-non";
+    let textStatut = "🔴 Non commencé";
+
+    if (item.statut === "termine") {
+      classeStatut = "statut-fait";
+      textStatut = "🟢 Terminé";
+    } else if (item.statut === "en_cours") {
+      classeStatut = "statut-cours";
+      textStatut = "🟠 En cours";
+    }
+
+    card.className = "item-suivi " + classeStatut;
+
+    let htmlAgents = "";
+    if (item.agentsDerniers && item.agentsDerniers.length > 0) {
+      htmlAgents = "<div style='margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;'>";
+      item.agentsDerniers.forEach(a => {
+        let imgTag = a.gradeUrl ? genererImageGrade(a.gradeUrl, "", "20px") : '';
+        htmlAgents += `<span class="agent-badge">${imgTag} ${escapeHtml(a.nom)}</span>`;
+      });
+      htmlAgents += "</div>";
+    }
+
+    let htmlAnomalies = "";
+    if (item.anomalies && item.anomalies.length > 0) {
+      htmlAnomalies = "<div style='margin-top:8px;'>";
+      item.anomalies.forEach(an => {
+        let nomMat = (an.groupe && an.groupe !== "-") ? an.groupe + " - " + an.materiel : an.materiel;
+        if (an.statut === "absent") {
+          htmlAnomalies += `<span class="anomalie-tag anomalie-absent">🔴 [${escapeHtml(an.zone)}] ${escapeHtml(nomMat)} : ABSENT</span>`;
+        } else {
+          htmlAnomalies += `<span class="anomalie-tag anomalie-manquant">🟠 [${escapeHtml(an.zone)}] ${escapeHtml(nomMat)} : ${an.qteManquante}/${an.qteTotale} manquant(s)</span>`;
+        }
+      });
+      htmlAnomalies += "</div>";
+    }
+
+    let htmlSignalements = "";
+    const imageVehicule = IMAGES_PARC[item.nom] || "";
+
+    if (item.dernierSignalement) {
+      const sig = item.dernierSignalement;
+
+      htmlSignalements = `
+        <div class="dernier-signalement">
+          <div style="font-weight:800; color:#b45309; margin-bottom:5px;">
+            ⚠️ Dernier signalement
+          </div>
+          <div style="font-size:13px;">
+            <strong>🧰 ${escapeHtml(sig.coffre)}</strong>
+            ${sig.materiels ? `<br><strong>Matériel :</strong> ${escapeHtml(sig.materiels)}` : ""}
+            ${sig.observation ? `<br><strong>Observation :</strong> ${escapeHtml(sig.observation)}` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <div class="suivi-entete">
+          ${imageVehicule ? `<img src="${escapeHtml(imageVehicule)}" class="suivi-photo" alt="${escapeHtml(item.nom)}">` : ""}
+          <strong style="font-size:16px;">${escapeHtml(item.nom)}</strong>
+        </div>
+        <span style="font-weight:bold; font-size:13px; white-space:nowrap;">${textStatut}</span>
+      </div>
+      ${htmlAgents}
+      ${htmlAnomalies}
+      ${htmlSignalements}
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+function quitterEspaceResponsable() {
+  afficherPage(0);
+}
+
+function reinitialiserInventairesChrono() {
+  if (confirm("Voulez-vous vraiment réinitialiser les inventaires de la semaine en cours ?")) {
+    apiPost("/api/reset", {})
+      .then(function(res) {
+        alert(res.message);
+        chargerEspaceResponsable();
+      })
+      .catch(function(err) {
+        alert("Erreur: " + (err.message || err));
+      });
+  }
+}
+</script>
+
+</body>
+</html>
