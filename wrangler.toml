@@ -1,0 +1,7 @@
+name = "cis2-ham-v2"
+main = "worker.js"
+compatibility_date = "2026-08-21"
+
+[assets]
+directory = "."
+binding = "ASSETS"
